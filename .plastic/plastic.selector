@@ -1,4 +1,3 @@
 repository "GMTK_jam_2025_2d/GMTK_jam_2025_2d@13469101088128@cloud"
   path "/"
-    br "/main"
-    co "/main"
+    smartbranch "/main"

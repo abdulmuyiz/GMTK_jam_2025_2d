@@ -7,21 +7,24 @@ TagManager:
   - World
   - UI
   - BulletNumber
+  - Planet
+  - Enemy
+  - GM
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Ground
+  - 
   - Water
   - UI
   - 
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Ground
+  - Obstecals
+  - Player
+  - Bullet
+  - Enemy
   - 
   - 
   - 
@@ -43,6 +46,18 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: BackGround
+    uniqueID: 2295584935
+    locked: 0
+  - name: Enemy
+    uniqueID: 3659401543
+    locked: 0
+  - name: Things
+    uniqueID: 1312826391
+    locked: 0
+  - name: Player
+    uniqueID: 2407654911
     locked: 0
   m_RenderingLayers:
   - Default
