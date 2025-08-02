@@ -26,8 +26,9 @@ public class EnemyAI : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
+            if (collision.gameObject.GetComponent<PlayerController>().isImmune) return;
             // Destroy the current bullet
-            Destroy(collision.gameObject);
+            //Destroy(collision.gameObject);
         }
     }
 }

@@ -14,9 +14,10 @@ public class EnemySpawner : MonoBehaviour
 
     void SpawnEnemy()
     {
-        Vector2 spawnPos = (Vector2)player.position + Random.insideUnitCircle.normalized * spawnRadius;
-        GameObject enemy = Instantiate(enemyPrefab, new Vector3(spawnPos.x, player.position.y, spawnPos.y), Quaternion.identity);
-
+        Vector2 randomDir = Random.insideUnitCircle.normalized;
+        float spawnRadius = Random.Range(7f, 15f);
+        Vector2 spawnPos = (Vector2)player.position + randomDir * spawnRadius;
+        GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
         EnemyAI ai = enemy.GetComponent<EnemyAI>();
         if (ai != null) ai.player = player;
     }

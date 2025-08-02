@@ -1,15 +1,17 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header ("Other")]
     public PlayerInputActions playerControls; // Reference to the Input Action Asset    
-    public Camera camera;
     public Transform planet;
     public Transform firePoint;
     public GameObject bulletPrefab;
     public GameManger gameManager;
+    
 
     private Rigidbody2D rb;
     private Collider2D col;
@@ -27,10 +29,20 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f;
     private float r;
 
-
     [Header ("Dodge")]
-    public float dodgeDistance = 50f;
-    public int iFrame = 5;
+    private Vector2 dashDistance = Vector2.zero;
+    public bool isImmune = false;
+    public float dodgeCD = 1f;
+    private bool canDodge = true;
+    private bool lockDodge = true;
+    public float dodgeDistance = 5f;
+    public float iFrame = 0.5f;
+
+    [Header ("Camara")]
+    public Camera camera;
+    public CinemachineController camController;
+    public float panOutSpeed = 0.3f;
+    public float panInSpeed = 0.1f;
 
     void Awake()
     {
@@ -76,8 +88,16 @@ public class PlayerController : MonoBehaviour
     {
         if (gameManager.initEemiesCount <= 0)
         {
-            rb.MovePosition(rb.position + moveInput * moveSpeed * Time.fixedDeltaTime);
-            //planet.Rotate(moveInput.y * moveSpeed, moveInput.x * moveSpeed,0);
+            lockDodge = false;
+            if (dashDistance != Vector2.zero)
+            {
+                transform.position += (Vector3)dashDistance;
+                dashDistance = Vector2.zero;
+            }
+            else
+            {
+                rb.MovePosition(rb.position + moveInput * moveSpeed * Time.fixedDeltaTime);
+            }
         }
         Vector2 lookDirection = (mousePos - rb.position).normalized; // Calculate the direction to look at
         float angle = Mathf.Atan2(lookDirection.y, lookDirection.x) * Mathf.Rad2Deg - 90f; // Convert to degrees and adjust for sprite orientation
@@ -93,30 +113,47 @@ public class PlayerController : MonoBehaviour
     void Dodge(InputAction.CallbackContext context)
     {
         Vector3 dashDir = move.ReadValue<Vector2>();
-        rb.MovePosition(transform.position + dashDir * dodgeDistance);
-        StartCoroutine(IFrame());
+        if (canDodge && dashDir != Vector3.zero && !lockDodge)
+        {
+            dashDistance = dashDir * dodgeDistance;
+            StartCoroutine(IFrame());
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("World"))
         {
-            // Destroy the bullet when it exits the world bounds
-            //Vector2 collisionPoint = collision.ClosestPoint(transform.position);
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.x, 90, ref r, 0.1f);
-            transform.rotation = Quaternion.Euler(angle, 0, 0);
-            //gameObject.transform.position = -collisionPoint; // Optional: Reset position to the edge of the world
+            StopCoroutine("Tele");
+            Vector2 collisionPoint = collision.ClosestPoint(transform.position);
+            StartCoroutine(Tele(collisionPoint));
         }
     }
 
     private IEnumerator IFrame()
     {
-        Physics2D.IgnoreLayerCollision(11,12, true);
-        Physics2D.IgnoreLayerCollision(11,13, true);
-        spriteRenderer.color = new Color(0,0,1,0.5f);
+        canDodge = false;
+        Physics2D.IgnoreLayerCollision(11, 12, true);
+        Physics2D.IgnoreLayerCollision(11, 13, true);
+        spriteRenderer.color = new Color(0, 0, 1, 0.5f);
+        isImmune = true;
+        // Wait until dashDistance is zero vector before continuing
+        yield return new WaitUntil(() => dashDistance == Vector2.zero);
         yield return new WaitForSeconds(iFrame);
+        isImmune = false;
         spriteRenderer.color = Color.white;
         Physics2D.IgnoreLayerCollision(11, 12, false);
         Physics2D.IgnoreLayerCollision(11, 13, false);
+        yield return new WaitForSeconds(dodgeCD);
+        canDodge = true;
+    }
+
+    private IEnumerator Tele( Vector2 collisionPoint)
+    {
+        camController.PanOut();
+        yield return new WaitForSeconds(panOutSpeed);
+        gameObject.transform.position = -collisionPoint;
+        yield return new WaitForSeconds(panInSpeed);
+        camController.PanIn();
     }
 }

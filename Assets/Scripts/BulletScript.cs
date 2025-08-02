@@ -9,40 +9,30 @@ public class BulletScript : MonoBehaviour
     public float bulletPenetration = 3f;
     public PlayerController playerController;
     public GameManger gameManager;
+    private TrailRenderer myTrailRenderer;
 
     private void Awake()
     {
         gameManager = GameObject.FindGameObjectWithTag("GM").GetComponent<GameManger>();
         playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
     }
-    private void OnCollisionEnter2D(Collision2D collision)
+
+    private void Start()
     {
-    
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            // Destroy the current bullet
-            Destroy(collision.gameObject);
-        }
-        else if (collision.gameObject.CompareTag("Enemy"))
-        {
-            if (bulletPenetration > 0)
-            {
-                bulletPenetration--;
-                Destroy(collision.gameObject);
-            }
-            if (bulletPenetration == 0)
-            {
-                Destroy(gameObject);
-            }
-        }
+        // Destroy the bullet after a certain time to prevent memory leaks
+        Destroy(gameObject, bulletlifeTime);
+        myTrailRenderer = GetComponent<TrailRenderer>();
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
         {
+            if (collision.gameObject.GetComponent<PlayerController>().isImmune) return;
             // Destroy the current bullet
-            Destroy(collision.gameObject);
+            //Destroy(collision.gameObject);
+            bulletPenetration--;
         }
         else if (collision.gameObject.CompareTag("Enemy"))
         {
@@ -66,13 +56,10 @@ public class BulletScript : MonoBehaviour
             if (gameManager.initEemiesCount <= 0)
             {
                 // Destroy the bullet when it exits the world 
-                loop();
-                gameObject.transform.position = -collisionPoint;
-                //gameObject.transform.position = ;
-                //GameObject bullet = Instantiate(gameObject, -collisionPoint, Quaternion.identity);
-                //Vector3 v3 = -collisionPoint;
-                //bullet.GetComponent<Rigidbody2D>().AddForce((Vector3.zero - v3).normalized * 20f, ForceMode2D.Impulse);
-                //Destroy(gameObject);
+                if (gameObject.activeInHierarchy)
+                {
+                    StartCoroutine(loop(collisionPoint));
+                }
             }
             else
             {
@@ -82,29 +69,18 @@ public class BulletScript : MonoBehaviour
 
     }
 
-    private void Start()
+    private IEnumerator loop(Vector3 collisionPoint)
     {
-        // Destroy the bullet after a certain time to prevent memory leaks
-        Destroy(gameObject, bulletlifeTime);
-        //playerController.bulletCount--;
-
+        myTrailRenderer.emitting = false;
+        yield return new WaitForSeconds(0.1f);
+        gameObject.transform.position = -collisionPoint;
+        yield return new WaitForSeconds(0.1f);
+        myTrailRenderer.emitting = true;
     }
 
-    private IEnumerator loop()
+    private void OnDestroy()
     {
-        gameObject.GetComponent<Renderer>().enabled = false;
-        yield return new WaitForSeconds(0.5f);
-        gameObject.GetComponent<Renderer>().enabled = true;
+        StopCoroutine("loop");
     }
 
-    //    private void Update()
-    //    {
-    //        StartCoroutine(lifeTime());
-    //    }
-
-    //    private IEnumerator lifeTime()
-    //    {
-    //        yield return new WaitForSeconds(bulletlifeTime - 1);
-    //        playerController.bulletCount--;
-    //    }
 }
