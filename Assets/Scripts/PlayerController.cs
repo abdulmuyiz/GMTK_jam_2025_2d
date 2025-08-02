@@ -21,7 +21,6 @@ public class PlayerController : MonoBehaviour
     [Header ("Bullet")]
     private InputAction fire;
     public float bulletForce = 20f;
-    public int bulletCount = 0;
 
     [Header ("Movement")]
     private InputAction move;
@@ -89,7 +88,6 @@ public class PlayerController : MonoBehaviour
     {
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         bullet.GetComponent<Rigidbody2D>().AddForce(firePoint.up * bulletForce, ForceMode2D.Impulse); // Apply force to the bullet
-        bulletCount++;
     }
 
     void Dodge(InputAction.CallbackContext context)

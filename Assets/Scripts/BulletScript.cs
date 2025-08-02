@@ -33,7 +33,6 @@ public class BulletScript : MonoBehaviour
             if (bulletPenetration == 0)
             {
                 Destroy(gameObject);
-                playerController.bulletCount--;
             }
         }
     }
@@ -55,7 +54,6 @@ public class BulletScript : MonoBehaviour
             if (bulletPenetration == 0)
             {
                 Destroy(gameObject);
-                playerController.bulletCount--;
             }
         }
     }

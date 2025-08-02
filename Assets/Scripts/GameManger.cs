@@ -6,35 +6,43 @@ using UnityEngine.Rendering.Universal;
 
 public class GameManger : MonoBehaviour
 {
-    [SerializeField]
+    [Header ("UI")]
     public Canvas canvas;
+
+    [Header ("Player")]
     public PlayerController playerController;
-    public TextMeshProUGUI bulletnumber;
-    public GameObject initalEnemies;
+    public int playerHealth;
+
+    [Header ("Bullet")]
     public GameObject bulletPrefab;
-    public Camera cam;
-
-    public List<Vector3> initialBullets;
-
-
+    
+    [Header ("Intial Squence")]
+    public GameObject initalEnemies;
     public int initEemiesCount;
-    private EnemySpawner enemySpawner;
-
+    public List<Vector3> initialBullets;
+    
+    [Header ("Camera")]
+    public Camera cam;
     private LensDistortion distortion;
-
     private float fishdt = 0f;
     private bool zoomcheck = true;
     private bool slow = false;
 
+    [Header("World Speed")]
+    public float slowSpeed = 0.3f;
+    public float fastSpeed = 1.5f;
+
+    private EnemySpawner enemySpawner;
+
     private void Start()
     {
+        playerHealth = 5;
         initEemiesCount = initalEnemies.transform.childCount;
         cam.GetComponent<Volume>().profile.TryGet<LensDistortion>(out distortion);
     }
     // Update is called once per frame
     void Update()
     {
-        bulletnumber.SetText(playerController.bulletCount.ToString());
         InitBulletFunc();
         InitEnemyFunc();
     }
@@ -84,7 +92,7 @@ public class GameManger : MonoBehaviour
                 fishdt += 0.01f;
             else if (fishdt >= 0.5f || !zoomcheck)
             {
-                Time.timeScale = 0.3f;
+                Time.timeScale = slowSpeed;
                 zoomcheck = false;
                 if (fishdt > 0f)
                     fishdt -= 0.01f;
@@ -96,7 +104,7 @@ public class GameManger : MonoBehaviour
         }
         else
         {
-            Time.timeScale = 1f;
+            Time.timeScale = 1f; ;
         }
     }
 
