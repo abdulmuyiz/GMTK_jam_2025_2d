@@ -5,16 +5,15 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    [Header ("Other")]
     public PlayerInputActions playerControls; // Reference to the Input Action Asset    
     public Transform planet;
     public Transform firePoint;
     public GameObject bulletPrefab;
     public GameManger gameManager;
-    
 
     private Rigidbody2D rb;
     private Collider2D col;
+    private TrailRenderer trailRenderer;
     private Vector2 moveInput;
     private Vector2 mousePos;
     private InputAction dodge;
@@ -37,6 +36,9 @@ public class PlayerController : MonoBehaviour
     private bool lockDodge = true;
     public float dodgeDistance = 5f;
     public float iFrame = 0.5f;
+    public float explosionRadius = 5f;
+    public float explosionForce = 70000f;
+    public ParticleSystem dashParticleSystem;
 
     [Header ("Camara")]
     public Camera camera;
@@ -51,6 +53,7 @@ public class PlayerController : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         rb = this.GetComponent<Rigidbody2D>();
         col = rb.GetComponent<Collider2D>();
+        trailRenderer = GetComponent<TrailRenderer>();
     }  
 
     void OnEnable()
@@ -91,7 +94,7 @@ public class PlayerController : MonoBehaviour
             lockDodge = false;
             if (dashDistance != Vector2.zero)
             {
-                transform.position += (Vector3)dashDistance;
+                rb.MovePosition(rb.position + dashDistance);
                 dashDistance = Vector2.zero;
             }
             else
@@ -133,27 +136,43 @@ public class PlayerController : MonoBehaviour
     private IEnumerator IFrame()
     {
         canDodge = false;
-        Physics2D.IgnoreLayerCollision(11, 12, true);
-        Physics2D.IgnoreLayerCollision(11, 13, true);
         spriteRenderer.color = new Color(0, 0, 1, 0.5f);
         isImmune = true;
-        // Wait until dashDistance is zero vector before continuing
+        trailRenderer.emitting = true;
         yield return new WaitUntil(() => dashDistance == Vector2.zero);
+        if (dashParticleSystem != null)
+        {
+            dashParticleSystem.transform.position = transform.position;
+            dashParticleSystem.Play();
+        }
         yield return new WaitForSeconds(iFrame);
         isImmune = false;
+        Vector2 explosionPosition = rb.position;
+        Collider2D[] enemyColliders = Physics2D.OverlapCircleAll(explosionPosition, 2 * explosionRadius);
+        foreach (var hit in enemyColliders)
+        {
+            if (hit.gameObject.layer == 13 && hit.attachedRigidbody != null && hit.attachedRigidbody != rb)
+            {
+                Vector2 forceDir = (hit.transform.position - (Vector3)explosionPosition).normalized;
+                float distance = Vector2.Distance(explosionPosition, hit.transform.position);
+                float force = Mathf.Lerp(explosionForce, 0f, (float)(distance / (explosionRadius * 1.2f)));
+                hit.attachedRigidbody.AddForce(forceDir * force, ForceMode2D.Force);
+            }
+        }
+        trailRenderer.emitting = false;
         spriteRenderer.color = Color.white;
-        Physics2D.IgnoreLayerCollision(11, 12, false);
-        Physics2D.IgnoreLayerCollision(11, 13, false);
         yield return new WaitForSeconds(dodgeCD);
         canDodge = true;
     }
 
     private IEnumerator Tele( Vector2 collisionPoint)
     {
+        trailRenderer.emitting = true;
         camController.PanOut();
         yield return new WaitForSeconds(panOutSpeed);
         gameObject.transform.position = -collisionPoint;
         yield return new WaitForSeconds(panInSpeed);
         camController.PanIn();
+        trailRenderer.emitting = false;
     }
 }

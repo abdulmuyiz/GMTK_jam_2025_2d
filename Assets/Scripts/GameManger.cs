@@ -39,6 +39,8 @@ public class GameManger : MonoBehaviour
         playerHealth = 5;
         initEemiesCount = initalEnemies.transform.childCount;
         cam.GetComponent<Volume>().profile.TryGet<LensDistortion>(out distortion);
+        Physics2D.IgnoreLayerCollision(11, 12, true);
+        Physics2D.IgnoreLayerCollision(11, 13, true);
     }
     // Update is called once per frame
     void Update()

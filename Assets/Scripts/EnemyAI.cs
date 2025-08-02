@@ -4,22 +4,21 @@ public class EnemyAI : MonoBehaviour
 {
     public Transform player;
     public float speed = 3f;
-
+    private Rigidbody2D rb;
 
     private void Awake()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;    
+        player = GameObject.FindGameObjectWithTag("Player").transform;
+        rb = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         if (player == null) return;
 
-        // Move toward the player
-        Vector3 direction = (player.position - transform.position).normalized;
-        transform.position += direction * speed * Time.deltaTime;
-
+        // Move toward the player using velocity
+        Vector2 direction = (player.position - transform.position).normalized;
+        rb.linearVelocity = direction * speed;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -31,4 +30,5 @@ public class EnemyAI : MonoBehaviour
             //Destroy(collision.gameObject);
         }
     }
+
 }
