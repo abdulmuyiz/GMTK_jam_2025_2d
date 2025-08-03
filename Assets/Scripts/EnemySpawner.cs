@@ -23,4 +23,9 @@ public class EnemySpawner : MonoBehaviour
         EnemyAI ai = enemy.GetComponent<EnemyAI>();
         if (ai != null) ai.player = player;
     }
+    public void StopSpawning()
+    {
+        CancelInvoke("SpawnEnemy"); // Stops the InvokeRepeating call for SpawnEnemy
+        // Or to stop all invokes on this MonoBehaviour: CancelInvoke();
+    }
 }

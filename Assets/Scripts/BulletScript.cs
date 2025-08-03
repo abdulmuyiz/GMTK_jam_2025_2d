@@ -7,14 +7,14 @@ public class BulletScript : MonoBehaviour
 {
     public float bulletlifeTime = 15f;
     public float bulletPenetration = 3f;
-    public PlayerController playerController;
+    //public PlayerController playerController;
     public GameManger gameManager;
     private TrailRenderer myTrailRenderer;
 
     private void Awake()
     {
         gameManager = GameObject.FindGameObjectWithTag("GM").GetComponent<GameManger>();
-        playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
+        //playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
     }
 
     private void Start()
@@ -29,10 +29,12 @@ public class BulletScript : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
+            //PlayerController playerController = collision.gameObject.GetComponent<PlayerController>();
             if (collision.gameObject.GetComponent<PlayerController>().isImmune) return;
             // Destroy the current bullet
-            //Destroy(collision.gameObject);
-            bulletPenetration--;
+                gameManager.playerHealth--;
+                collision.gameObject.GetComponent<PlayerController>().DamageImmune();
+                bulletPenetration--;
         }
         else if (collision.gameObject.CompareTag("Enemy"))
         {
@@ -81,6 +83,11 @@ public class BulletScript : MonoBehaviour
     private void OnDestroy()
     {
         StopCoroutine("loop");
+    }
+
+    public void InitialDestroy(float life)
+    {
+        Destroy(gameObject,life);
     }
 
 }

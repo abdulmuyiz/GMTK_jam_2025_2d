@@ -10,8 +10,11 @@ public class GameManger : MonoBehaviour
     public Canvas canvas;
     public TextMeshProUGUI timeText;
     private float time;
+    public TextMeshProUGUI goldText;
+    public float gold = 0f;
+    public TextMeshProUGUI hpText;
 
-    [Header ("Player")]
+    [Header("Player")]
     public PlayerController playerController;
     public int playerHealth;
 
@@ -22,8 +25,9 @@ public class GameManger : MonoBehaviour
     public GameObject initalEnemies;
     public int initEemiesCount;
     public List<Vector3> initialBullets;
-    
-    [Header ("Camera")]
+
+    [Header("Camera")]
+    public CinemachineController cinecam;
     public Camera cam;
     private LensDistortion distortion;
     private float fishdt = 0f;
@@ -48,6 +52,24 @@ public class GameManger : MonoBehaviour
         InitBulletFunc();
         InitEnemyFunc();
         TimeDisplay();
+        GoldDisplay();
+        HpDisplay();
+        if (playerHealth <= 0)
+        {
+            cinecam.PanOut();
+            if (playerController != null)
+            {
+                                playerController.enabled = false;
+            }
+            if (enemySpawner != null)
+            {
+                enemySpawner.StopSpawning();
+                enemySpawner.enabled = false;
+                //enemySpawner.StopAllCoroutines();
+            }
+
+            Time.timeScale = 1f;
+        }
     }
 
     private void FixedUpdate()
@@ -82,6 +104,7 @@ public class GameManger : MonoBehaviour
             {
                 GameObject bullet = Instantiate(bulletPrefab, initialBullets[i], Quaternion.identity);
                 bullet.GetComponent<Rigidbody2D>().AddForce((Vector3.zero -initialBullets[i]).normalized * 20f, ForceMode2D.Impulse);
+                bullet.GetComponent<BulletScript>().InitialDestroy(4f);
             }
             
         }
@@ -117,6 +140,18 @@ public class GameManger : MonoBehaviour
         int min = Mathf.FloorToInt(time / 60);
         int sec = Mathf.FloorToInt(time % 60);
         timeText.text = string.Format("{0:00}:{1:00}", min, sec);
+    }
+
+    private void GoldDisplay()
+    {
+        
+        goldText.text = string.Format("{0:00000}", gold);
+    }
+
+    private void HpDisplay()
+    {
+        if (playerHealth < 0) playerHealth = 0;
+        hpText.text = string.Format("X{0}", playerHealth);
     }
 
 }

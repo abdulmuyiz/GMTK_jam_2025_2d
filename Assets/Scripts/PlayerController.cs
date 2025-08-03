@@ -152,6 +152,28 @@ public class PlayerController : MonoBehaviour
         canDodge = true;
     }
 
+    public void DamageImmune()
+    {
+
+        if (!isImmune)
+        {
+            StopCoroutine("Immune");
+            StartCoroutine(Immune());
+        }
+    }
+
+    private IEnumerator Immune()
+    {
+        Physics2D.IgnoreLayerCollision(11, 12, true);
+        Physics2D.IgnoreLayerCollision(11, 13, true);
+        isImmune = true;
+        // Wait until dashDistance is zero vector before continuing
+        yield return new WaitForSeconds(iFrame);
+        isImmune = false;
+        Physics2D.IgnoreLayerCollision(11, 12, false);
+        Physics2D.IgnoreLayerCollision(11, 13, false);
+    }
+
     private IEnumerator Tele( Vector2 collisionPoint)
     {
         camController.PanOut();
@@ -159,5 +181,11 @@ public class PlayerController : MonoBehaviour
         gameObject.transform.position = -collisionPoint;
         yield return new WaitForSeconds(panInSpeed);
         camController.PanIn();
+    }
+
+    private void OnDestroy()
+    {
+        StopCoroutine("IFrame");
+        StopCoroutine("Tele");
     }
 }

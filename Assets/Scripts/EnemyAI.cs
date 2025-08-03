@@ -4,11 +4,13 @@ public class EnemyAI : MonoBehaviour
 {
     public Transform player;
     public float speed = 3f;
+    public GameManger gameManager;
 
 
     private void Awake()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;    
+        player = GameObject.FindGameObjectWithTag("Player").transform;
+        gameManager = GameObject.FindGameObjectWithTag("GM").GetComponent<GameManger>();
     }
 
     // Update is called once per frame
@@ -17,8 +19,11 @@ public class EnemyAI : MonoBehaviour
         if (player == null) return;
 
         // Move toward the player
-        Vector3 direction = (player.position - transform.position).normalized;
-        transform.position += direction * speed * Time.deltaTime;
+        Vector2 direction = (player.position - transform.position).normalized;
+        transform.position += (Vector3)(direction * speed * Time.deltaTime);
+
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 180f;
+        transform.rotation = Quaternion.Euler(0, 0, angle);
 
     }
 
@@ -27,8 +32,13 @@ public class EnemyAI : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             if (collision.gameObject.GetComponent<PlayerController>().isImmune) return;
-            // Destroy the current bullet
-            //Destroy(collision.gameObject);
+            gameManager.playerHealth--;
+            collision.gameObject.GetComponent<PlayerController>().DamageImmune();
         }
+    }
+
+    private void OnDestroy()
+    {
+        gameManager.gold++;
     }
 }

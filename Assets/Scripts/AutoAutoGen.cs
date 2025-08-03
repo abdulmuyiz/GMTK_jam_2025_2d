@@ -10,13 +10,13 @@ public class AutoAutoGen : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log(count);
         if(count == 0)
         {
             StartCoroutine(auto());
         }
         else
         {
+            StopCoroutine(auto());
             this.enabled = false;
         }
 
@@ -28,9 +28,9 @@ public class AutoAutoGen : MonoBehaviour
         {
             yield return new WaitForSeconds(0.1f);
             duplicate = GameObject.FindGameObjectWithTag("ChestGroup");
-            GameObject one = Instantiate(duplicate, Vector3.zero, Quaternion.Euler(0, 0, 90));
-            GameObject two =Instantiate(duplicate, Vector3.zero, Quaternion.Euler(0, 0, 180));
-            GameObject three = Instantiate(duplicate, Vector3.zero, Quaternion.Euler(0, 0, 270));
+            GameObject one = Instantiate(duplicate, new Vector3(-27, 0, 0), Quaternion.identity);
+            GameObject two =Instantiate(duplicate, new Vector3(-27,-30,0), Quaternion.identity);
+            GameObject three = Instantiate(duplicate, new Vector3(0, -30, 0), Quaternion.identity);
             one.transform.SetParent(parent.transform);
             two.transform.SetParent(parent.transform);
             three.transform.SetParent(parent.transform);
