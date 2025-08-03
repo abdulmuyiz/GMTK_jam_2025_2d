@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     public Transform firePoint;
     public GameObject bulletPrefab;
     public GameManger gameManager;
+    public SoundManager soundManager;
     
 
     private Rigidbody2D rb;
@@ -106,6 +107,7 @@ public class PlayerController : MonoBehaviour
 
     void Fire(InputAction.CallbackContext context)
     {
+        soundManager.FireSound();
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         bullet.GetComponent<Rigidbody2D>().AddForce(firePoint.up * bulletForce, ForceMode2D.Impulse); // Apply force to the bullet
     }
@@ -115,7 +117,9 @@ public class PlayerController : MonoBehaviour
         Vector3 dashDir = move.ReadValue<Vector2>();
         if (canDodge && dashDir != Vector3.zero && !lockDodge)
         {
+            soundManager.DodgeSound();
             dashDistance = dashDir * dodgeDistance;
+            soundManager.FieldExp();
             StartCoroutine(IFrame());
         }
     }

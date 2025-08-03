@@ -8,6 +8,8 @@ public class GameManger : MonoBehaviour
 {
     [Header ("UI")]
     public Canvas canvas;
+    public TextMeshProUGUI timeText;
+    private float time;
 
     [Header ("Player")]
     public PlayerController playerController;
@@ -45,6 +47,7 @@ public class GameManger : MonoBehaviour
     {
         InitBulletFunc();
         InitEnemyFunc();
+        TimeDisplay();
     }
 
     private void FixedUpdate()
@@ -106,6 +109,14 @@ public class GameManger : MonoBehaviour
         {
             Time.timeScale = 1f; ;
         }
+    }
+
+    private void TimeDisplay()
+    {
+        time += Time.deltaTime;
+        int min = Mathf.FloorToInt(time / 60);
+        int sec = Mathf.FloorToInt(time % 60);
+        timeText.text = string.Format("{0:00}:{1:00}", min, sec);
     }
 
 }

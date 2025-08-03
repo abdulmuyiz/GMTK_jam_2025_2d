@@ -9,6 +9,8 @@ public class AutoGeneration : MonoBehaviour
     public float displayRadius = 1;
     public int maxCount;
     private int count = 0;
+    public GameObject parentObject;
+    private GameObject chestObject;
     [SerializeField] GameObject chest;
 
     List<Vector2> points;
@@ -39,7 +41,8 @@ public class AutoGeneration : MonoBehaviour
             {
                 count++;
                 Vector2 selPoint = points[Random.Range(0, points.Count)];
-                Instantiate(chest, selPoint, Quaternion.identity);
+                chestObject = Instantiate(chest, selPoint, Quaternion.identity);
+                chestObject.transform.SetParent(parentObject.transform);
             }
         }
     }
