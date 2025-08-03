@@ -7,10 +7,31 @@ public class EnemySpawner : MonoBehaviour
     public Transform player;
     public float spawnInterval = 2f;
     public float spawnRadius = 10f;
+    public float minSpawnDelay = 0.5f;
+    public float difficultyIncreaseRate = 0.1f; // how much faster per second
+
+    private float currentSpawnDelay;
+    private float spawnTimer;
 
     private void Start()
     {
-        InvokeRepeating(nameof(SpawnEnemy), 1f, spawnInterval);
+        currentSpawnDelay = spawnInterval;
+        spawnTimer = currentSpawnDelay;
+    }
+
+    void Update()
+    {
+        spawnTimer -= Time.fixedDeltaTime;
+
+        if (spawnTimer <= 0f)
+        {
+            SpawnEnemy();
+            spawnTimer = currentSpawnDelay;
+        }
+
+        // Gradually decrease spawn delay over time
+        currentSpawnDelay -= difficultyIncreaseRate * Time.deltaTime;
+        currentSpawnDelay = Mathf.Clamp(currentSpawnDelay, minSpawnDelay, spawnInterval);
     }
 
     void SpawnEnemy()
@@ -22,10 +43,5 @@ public class EnemySpawner : MonoBehaviour
         enemy.transform.SetParent(parentEnemies.transform);
         EnemyAI ai = enemy.GetComponent<EnemyAI>();
         if (ai != null) ai.player = player;
-    }
-    public void StopSpawning()
-    {
-        CancelInvoke("SpawnEnemy"); // Stops the InvokeRepeating call for SpawnEnemy
-        // Or to stop all invokes on this MonoBehaviour: CancelInvoke();
     }
 }

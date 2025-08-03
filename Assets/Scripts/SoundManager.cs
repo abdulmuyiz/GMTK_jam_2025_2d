@@ -10,6 +10,7 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioClip fireSound;
     [SerializeField] private AudioClip dodgeSound;
     [SerializeField] private AudioClip expSound;
+    [SerializeField] private AudioClip dmgSound;
 
     [SerializeField] private float bgSoundVolume;
     [SerializeField] private float deathVolume;
@@ -17,6 +18,7 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private float fireVolume;
     [SerializeField] private float dodgeVolume;
     [SerializeField] private float expVolume;
+    [SerializeField] private float dmgVolume;
 
     public void DeathSound()
     {
@@ -41,5 +43,10 @@ public class SoundManager : MonoBehaviour
     public void FieldExp()
     {
         audioSrc.PlayOneShot(expSound, expVolume);
+    }
+
+    public void DmgSound()
+    {
+        audioSrc.PlayOneShot(dmgSound, dmgVolume);
     }
 }

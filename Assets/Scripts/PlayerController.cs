@@ -12,14 +12,15 @@ public class PlayerController : MonoBehaviour
     public GameObject bulletPrefab;
     public GameManger gameManager;
     public SoundManager soundManager;
-    
+    public AnimationScript animator;
 
     private Rigidbody2D rb;
     private Collider2D col;
-    private Vector2 moveInput;
+    public Vector2 moveInput;
     private Vector2 mousePos;
     private InputAction dodge;
     private SpriteRenderer spriteRenderer;
+    private TrailRenderer trailRenderer;
 
     [Header ("Bullet")]
     private InputAction fire;
@@ -38,6 +39,9 @@ public class PlayerController : MonoBehaviour
     private bool lockDodge = true;
     public float dodgeDistance = 5f;
     public float iFrame = 0.5f;
+    public float explosionRadius = 12f;
+    public float explosionForce = 20f;
+    public ParticleSystem dashParticleSystem;
 
     [Header ("Camara")]
     public Camera camera;
@@ -52,6 +56,7 @@ public class PlayerController : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         rb = this.GetComponent<Rigidbody2D>();
         col = rb.GetComponent<Collider2D>();
+        trailRenderer = GetComponent<TrailRenderer>();
     }  
 
     void OnEnable()
@@ -108,6 +113,7 @@ public class PlayerController : MonoBehaviour
     void Fire(InputAction.CallbackContext context)
     {
         soundManager.FireSound();
+        //animator.FireAnimation(); // Trigger the fire animation
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         bullet.GetComponent<Rigidbody2D>().AddForce(firePoint.up * bulletForce, ForceMode2D.Impulse); // Apply force to the bullet
     }
@@ -141,13 +147,32 @@ public class PlayerController : MonoBehaviour
         Physics2D.IgnoreLayerCollision(11, 13, true);
         spriteRenderer.color = new Color(0, 0, 1, 0.5f);
         isImmune = true;
-        // Wait until dashDistance is zero vector before continuing
+        trailRenderer.emitting = true;
         yield return new WaitUntil(() => dashDistance == Vector2.zero);
+        if (dashParticleSystem != null)
+        {
+            dashParticleSystem.transform.position = transform.position;
+            dashParticleSystem.Play();
+        }
+        Vector2 explosionPosition = rb.position;
+        Collider2D[] enemyColliders = Physics2D.OverlapCircleAll(explosionPosition, explosionRadius);
+        foreach (var hit in enemyColliders)
+        {
+            if (hit.gameObject.layer == 13 && hit.attachedRigidbody != null && hit.attachedRigidbody != rb)
+            {
+                Vector2 forceDir = (hit.transform.position - (Vector3)explosionPosition).normalized;
+                float distance = Vector2.Distance(explosionPosition, hit.transform.position);
+                float force = Mathf.Lerp(explosionForce, 0f, (float)(distance / (explosionRadius)));
+                hit.gameObject.GetComponent<EnemyAI>().Knockback(forceDir, force);
+            }
+        }
         yield return new WaitForSeconds(iFrame);
         isImmune = false;
-        spriteRenderer.color = Color.white;
+        trailRenderer.emitting = false;
+        spriteRenderer.GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 0f);
         Physics2D.IgnoreLayerCollision(11, 12, false);
         Physics2D.IgnoreLayerCollision(11, 13, false);
+
         yield return new WaitForSeconds(dodgeCD);
         canDodge = true;
     }
@@ -168,7 +193,9 @@ public class PlayerController : MonoBehaviour
         Physics2D.IgnoreLayerCollision(11, 13, true);
         isImmune = true;
         // Wait until dashDistance is zero vector before continuing
+        spriteRenderer.GetComponent<SpriteRenderer>().color = new Color(1, 0, 0, 1f);
         yield return new WaitForSeconds(iFrame);
+        spriteRenderer.GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 0f);
         isImmune = false;
         Physics2D.IgnoreLayerCollision(11, 12, false);
         Physics2D.IgnoreLayerCollision(11, 13, false);
@@ -176,16 +203,12 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Tele( Vector2 collisionPoint)
     {
+        trailRenderer.emitting = true;
         camController.PanOut();
         yield return new WaitForSeconds(panOutSpeed);
         gameObject.transform.position = -collisionPoint;
         yield return new WaitForSeconds(panInSpeed);
         camController.PanIn();
-    }
-
-    private void OnDestroy()
-    {
-        StopCoroutine("IFrame");
-        StopCoroutine("Tele");
+        trailRenderer.emitting = false;
     }
 }

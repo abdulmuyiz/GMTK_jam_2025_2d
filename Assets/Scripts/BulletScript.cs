@@ -10,10 +10,12 @@ public class BulletScript : MonoBehaviour
     //public PlayerController playerController;
     public GameManger gameManager;
     private TrailRenderer myTrailRenderer;
+    private SoundManager soundManager;
 
     private void Awake()
     {
         gameManager = GameObject.FindGameObjectWithTag("GM").GetComponent<GameManger>();
+        soundManager = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<SoundManager>();
         //playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
     }
 
@@ -33,6 +35,7 @@ public class BulletScript : MonoBehaviour
             if (collision.gameObject.GetComponent<PlayerController>().isImmune) return;
             // Destroy the current bullet
                 gameManager.playerHealth--;
+                soundManager.DmgSound();
                 collision.gameObject.GetComponent<PlayerController>().DamageImmune();
                 bulletPenetration--;
         }

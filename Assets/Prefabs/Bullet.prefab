@@ -168,7 +168,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletlifeTime: 15
   bulletPenetration: 3
-  playerController: {fileID: 0}
   gameManager: {fileID: 0}
 --- !u!96 &732843611346066511
 TrailRenderer:
@@ -194,7 +193,7 @@ TrailRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 15303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 143e33e5eda734c42aa118bf25d14cb8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -215,7 +214,7 @@ TrailRenderer:
   m_SortingLayerID: 1312826391
   m_SortingLayer: 3
   m_SortingOrder: 0
-  m_Time: 0.5
+  m_Time: 0.3
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
@@ -225,7 +224,7 @@ TrailRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.28341103
+        value: 0.48906898
         inSlope: 0
         outSlope: 0
         tangentMode: 0

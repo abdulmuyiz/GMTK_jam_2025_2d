@@ -14,9 +14,14 @@ public class GameManger : MonoBehaviour
     public float gold = 0f;
     public TextMeshProUGUI hpText;
 
+    [Header ("Sound")]
+    public SoundManager soundManager;
+
     [Header("Player")]
     public PlayerController playerController;
+    private GameObject playerRb;
     public int playerHealth;
+    public AnimationScript animationScript;
 
     [Header ("Bullet")]
     public GameObject bulletPrefab;
@@ -45,6 +50,9 @@ public class GameManger : MonoBehaviour
         playerHealth = 5;
         initEemiesCount = initalEnemies.transform.childCount;
         cam.GetComponent<Volume>().profile.TryGet<LensDistortion>(out distortion);
+        playerRb = GameObject.FindGameObjectWithTag("Player");
+        Physics2D.IgnoreLayerCollision(11, 12, false);
+        Physics2D.IgnoreLayerCollision(11, 13, false);
     }
     // Update is called once per frame
     void Update()
@@ -59,11 +67,18 @@ public class GameManger : MonoBehaviour
             cinecam.PanOut();
             if (playerController != null)
             {
-                                playerController.enabled = false;
+                //StopCoroutine("IFrame");
+                //StopCoroutine("Tele");
+                StopAllCoroutines();
+                //playerRb.transform.position = new Vector3(0f, 0f, 10f);
+                Physics2D.IgnoreLayerCollision(11, 12, true);
+                Physics2D.IgnoreLayerCollision(11, 13, true);
+                animationScript.DeathAnimation();
+                soundManager.enabled = false;
+                playerController.enabled = false;
             }
             if (enemySpawner != null)
             {
-                enemySpawner.StopSpawning();
                 enemySpawner.enabled = false;
                 //enemySpawner.StopAllCoroutines();
             }
